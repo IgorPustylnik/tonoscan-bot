@@ -108,7 +108,7 @@ async def is_enabled():
     await app.run()
 
 async def on_startup(x):
-    asyncio.create_task(asyncio.to_thread(app.run))
+    asyncio.create_task(asyncio.to_thread(app.run(host='0.0.0.0', port=5000, debug=True)))
 
 if __name__ == '__main__':
     executor.start_polling(dispatcher=dp, skip_updates=True, on_startup=on_startup)
