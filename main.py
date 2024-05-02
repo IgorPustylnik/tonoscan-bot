@@ -84,7 +84,7 @@ async def handle_contact(m: types.Message):
     await send_to_server(contact.phone_number, contact.user_id)
 
 
-async def send_message(pjs):
+def send_message(pjs):
     from datetime import datetime
     chat_id = pjs['id']
     dia = pjs['info'][0]['dia']
@@ -94,8 +94,7 @@ async def send_message(pjs):
     date = date_info.strftime("%d %B %Y года в %H:%M").format(month=month_names[date_info.month])
     name = pjs['info'][4]['name']
     text = f'Получены данные об измерении, произведённом {date} от {name}:\nDIA: {dia}\nSYS: {sys}\nPULSE: {pulse}\nБудьте здоровы!'
-
-    await dp.bot.send_message(chat_id=chat_id, text=text)
+    dp.bot.send_message(chat_id=chat_id, text=text)
 
 
 @dp.message_handler()
@@ -108,7 +107,7 @@ async def is_enabled():
     await app.run()
 
 async def on_startup(x):
-    asyncio.create_task(asyncio.to_thread(app.run()))
+    await asyncio.create_task(asyncio.to_thread(app.run(host='0.0.0.0', port=5000, debug=True)))
 
 if __name__ == '__main__':
     executor.start_polling(dispatcher=dp, skip_updates=True, on_startup=on_startup)
