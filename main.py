@@ -53,11 +53,15 @@ def send_to_server(number: int, id: int):
 
 
 @app.route('/send_message', methods=['POST'])
-def webhook():
-    got = request.stream.read().decode('utf-8')
-    parsed_json = json.loads(got)
-    send_message(parsed_json)
-    return '', 200
+def message_request():
+    if request.headers['Content-Type'] == 'application/json':
+        parsed_json = request.json
+        print("tried")
+        print(parsed_json)
+        send_message(parsed_json)
+        return 'success', 200
+    else:
+        return 'unsupported media type', 415
 
 
 @bot.message_handler(commands=['start'])
