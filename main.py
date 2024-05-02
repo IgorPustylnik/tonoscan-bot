@@ -1,4 +1,3 @@
-import datetime
 import json
 import requests
 from aiogram.types import ParseMode
@@ -6,7 +5,6 @@ from flask import Flask, request
 from flask_restful import Api
 import asyncio
 from aiogram import Bot, Dispatcher, executor, types
-
 
 app = Flask(__name__)
 api = Api(app)
@@ -106,13 +104,11 @@ async def debug(message: types.Message):
 
 
 async def is_enabled():
-    while True:
-        await app.run()
+  while True:
+    await app.run()
 
-
-async def on_startup():
+async def on_startup(x):
     asyncio.create_task(asyncio.to_thread(app.run))
-
 
 if __name__ == '__main__':
     executor.start_polling(dispatcher=dp, skip_updates=True, on_startup=on_startup)
