@@ -103,6 +103,7 @@ def send_message(pjs):
 def debug(message):
     print(f'{datetime.fromtimestamp(message.date)} {message.from_user.username}: {message.text} {message}')
 
+bot.polling()
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
