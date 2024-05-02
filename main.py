@@ -9,7 +9,6 @@ import json
 app = Flask(__name__)
 
 bot = telebot.TeleBot('7040913152:AAF08LsRRx4y-jbCN9T8WnAtppFqwrgJCos')
-bot.set_webhook(url="https://webhook.site/e175c8bf-bef3-4c39-92aa-c6b15613fd9a")
 
 month_names = {
     1: "января",
@@ -26,6 +25,12 @@ month_names = {
     12: "декабря"
 }
 
+
+@app.route('/', methods=['GET'])
+def index():
+    return 'Привет, мир! Это удалённый сервер.'
+
+
 def send_to_server(number: int, id: int):
     url = 'https://tonometer.onrender.com/auth/XXXXXXXXXXXXXXXXXXXXXX'
 
@@ -36,6 +41,7 @@ def send_to_server(number: int, id: int):
         "id": str(id)
     }
     json_data = json.dumps(data)
+    print(f'SENT JSON DATA: {json_data}')
 
     response = requests.get(url, headers=headers, data=json_data)
 
@@ -46,7 +52,7 @@ def send_to_server(number: int, id: int):
         print('Ошибка при запросе:', response.status_code)
 
 
-@app.route('/' + bot.token, methods=['POST'])
+@app.route('/send_message', methods=['POST'])
 def webhook():
     got = request.stream.read().decode('utf-8')
     parsed_json = json.loads(got)
@@ -74,6 +80,7 @@ def handle_contact(m):
                                 "на телефоне вашей бабки, обязательно сделайте это! Это необходимо для того, чтобы бот "
                                 "моментально присылал вам информацию об измерениях давления.")
 
+
 def send_message(pjs):
     chat_id = pjs['id']
     dia = pjs['info'][0]['dia']
@@ -94,4 +101,4 @@ def debug(message):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
