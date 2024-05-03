@@ -10,7 +10,7 @@ token = "7040913152:AAF08LsRRx4y-jbCN9T8WnAtppFqwrgJCos"
 
 
 def set_webhook():
-    url = f"https://api.telegram.org/bot{token}/setWebhook"
+    url = f"https://api.telegram.org/bot{token}/setWebhook?https://tonoscan-bot.onrender.com/webhook/{token}"
     webhook_url = "https://tonoscan-bot.onrender.com/webhook"
     data = {"url": webhook_url}
     response = requests.post(url, json=data)
@@ -160,5 +160,5 @@ def send_to_server(number: int, id: int):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5005, debug=True)
     set_webhook()
