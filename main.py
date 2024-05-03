@@ -13,7 +13,7 @@ def set_webhook():
     url = f"https://api.telegram.org/bot{token}/setWebhook?https://tonoscan-bot.onrender.com/webhook/{token}"
     webhook_url = "https://tonoscan-bot.onrender.com/webhook"
     data = {"url": webhook_url}
-    response = requests.post(url, json=data)
+    response = requests.post(url)
     if response.ok:
         print("Вебхук установлен успешно.")
     else:
