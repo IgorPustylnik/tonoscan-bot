@@ -24,7 +24,7 @@ async def send_to_server(number: int, id: int):
     json_data = json.dumps(data)
     logger.info(f'SENT JSON DATA: {json_data}')
 
-    response = requests.get(url, headers=headers, data=json_data)
+    response = requests.post(url, headers=headers, data=json_data)
 
     if response.status_code == 200:
         logger.info('Успешный запрос!')
