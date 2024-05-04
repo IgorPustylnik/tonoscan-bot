@@ -60,7 +60,7 @@ def send_info(pjs):
 
 def send_message(chat_id, text):
     method = "sendMessage"
-    token = "7040913152:AAF08LsRRx4y-jbCN9T8WnAtppFqwrgJCos"
+    token = "7040913152:AAHJ9LadCW8pZyjo9MdpzvUA2-u5F4B7aG8"
     url = f"https://api.telegram.org/bot{token}/{method}"
     data = {"chat_id": chat_id, "text": text}
     requests.post(url, data=data)
