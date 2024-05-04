@@ -1,11 +1,13 @@
+import logging
 from flask import Flask
 from flask import request
 from threading import Thread
-import time
 import json
 import requests
 
 app = Flask('')
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
 @app.route('/', methods=['GET'])
@@ -20,23 +22,22 @@ def send_to_server(number: int, id: int):
 
     data = {"number": str(number), "telegramId": str(id)}
     json_data = json.dumps(data)
-    print(f'SENT JSON DATA: {json_data}')
+    logger.info(f'SENT JSON DATA: {json_data}')
 
     response = requests.get(url, headers=headers, data=json_data)
 
     if response.status_code == 200:
-        print('Успешный запрос!')
-        print(response.json())
+        logger.info('Успешный запрос!')
+        logger.info(response.json())
     else:
-        print('Ошибка при запросе:', response.status_code)
+        logger.info('Ошибка при запросе:', response.status_code)
 
 
 @app.route('/send_message', methods=['POST'])
 def message_request():
+    logger.info(request)
     if request.headers['Content-Type'] == 'application/json':
         parsed_json = request.json
-        print("tried to parse request")
-        print(parsed_json)
         send_info(parsed_json)
         return 'success', 200
     else:
