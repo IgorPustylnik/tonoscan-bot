@@ -32,7 +32,7 @@ async def handle_contact(m: types.Message):
 
 @dp.message_handler()
 async def debug(message: types.Message):
-    logger.info(f'{message.date} {message.from_user.username}: {message.text}\n')
+    logger.info(f'{message.date} {message.from_user.username}: {message.text}')
 
 
 keep_alive()

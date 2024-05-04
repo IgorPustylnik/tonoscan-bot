@@ -47,13 +47,13 @@ def message_request():
 def send_info(pjs):
     from datetime import datetime
     chat_id = pjs['id']
-    dia = pjs['info'][0]['dia']
-    sys = pjs['info'][1]['sys']
-    pulse = pjs['info'][2]['pulse']
-    date_info = datetime.fromisoformat(pjs['info'][3]['date'])
+    dia = pjs['dia']
+    sys = pjs['sys']
+    pulse = pjs['pulse']
+    date_info = datetime.fromisoformat(pjs['date'])
     date = date_info.strftime("%d {month} %Y года в %H:%M").format(
         month=month_names[date_info.month])
-    name = pjs['info'][4]['name']
+    name = pjs['name']
     text = f'Получены данные об измерении, произведённом {date} от {name}:\nDIA: {dia}\nSYS: {sys}\nPULSE: {pulse}\nБудьте здоровы!'
     send_message(chat_id, text)
 
