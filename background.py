@@ -35,7 +35,7 @@ def send_to_server(number: int, id: int):
 
 @app.route('/send_message', methods=['POST'])
 def message_request():
-    logger.info(request)
+    logger.info(request.json)
     if request.headers['Content-Type'] == 'application/json':
         parsed_json = request.json
         send_info(parsed_json)
