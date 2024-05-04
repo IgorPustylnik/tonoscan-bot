@@ -15,12 +15,12 @@ def index():
     return 'Привет, мир! Это удалённый сервер.'
 
 
-def send_to_server(number: int, id: int):
+async def send_to_server(number: int, id: int):
     url = 'https://tonometer.onrender.com/auth/add-telegram-id'
 
     headers = {'Content-Type': 'application/json'}
 
-    data = {"number": str(number), "telegramId": str(id)}
+    data = {"number": number, "telegramId": id}
     json_data = json.dumps(data)
     logger.info(f'SENT JSON DATA: {json_data}')
 
