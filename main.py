@@ -3,7 +3,7 @@ from aiogram.types import ParseMode
 from background import keep_alive, send_to_server, logger
 from aiogram import Bot, Dispatcher, executor, types
 
-API_TOKEN = '7040913152:AAF08LsRRx4y-jbCN9T8WnAtppFqwrgJCos'
+API_TOKEN = '7040913152:AAHJ9LadCW8pZyjo9MdpzvUA2-u5F4B7aG8'
 logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=API_TOKEN)
