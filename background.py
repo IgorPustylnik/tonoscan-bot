@@ -30,7 +30,7 @@ async def send_to_server(number: int, id: int):
         logger.info('Успешный запрос!')
         logger.info(response.json())
     else:
-        logger.info('Ошибка при запросе:', response.status_code)
+        logger.info(f'Ошибка при запросе:{response.status_code}')
 
 
 @app.route('/send_message', methods=['POST'])
