@@ -16,7 +16,7 @@ def index():
 
 
 async def send_to_server(number: int, id: int):
-    url = 'https://tonometer.onrender.com/auth/add-telegram-id'
+    url = 'https://tonometer.onrender.com/tonoscan-api/add-telegram-id'
 
     headers = {'Content-Type': 'application/json'}
 
@@ -24,11 +24,10 @@ async def send_to_server(number: int, id: int):
     json_data = json.dumps(data)
     logger.info(f'SENT JSON DATA: {json_data}')
 
-    response = requests.post(url, headers=headers, data=json_data)
+    response = requests.post(url, headers=headers, json=json_data)
 
     if response.status_code == 200:
         logger.info('Успешный запрос!')
-        logger.info(response.json())
     else:
         logger.info(f'Ошибка при запросе:{response.status_code}')
 
