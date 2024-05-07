@@ -1,5 +1,4 @@
 import base64
-import io
 import logging
 import os
 import struct
@@ -8,9 +7,8 @@ import requests
 from flask import Flask
 from flask import request
 from threading import Thread
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
-import aiogram
 
 app = Flask('')
 logger = logging.getLogger(__name__)
@@ -49,14 +47,14 @@ def message_request():
 def send_info(pjs):
     chat_id = pjs['id']
     date_iso = datetime.strptime(pjs['date'], "%b %d, %Y, %I:%M:%S %p").isoformat()
-    date_info = datetime.fromisoformat(date_iso)
-    date = date_info.strftime("%d {month} %Y года в %H:%M").format(
+    date_info = datetime.fromisoformat(date_iso) + timedelta(hours=3)
+    date = date_info.strftime("%d {month} %Y года в %H:%M мск").format(
         month=month_names[date_info.month])
     name = pjs['name']
     if 'photo' in pjs:
         photo = pjs['photo']
-        text = (f'Получены данные об измерении, произведённом {date} от {name} (не удалось распознать значения).\n'
-                f'Будьте здоровы!')
+        text = (f'Получено фото, сделанное {date} от {name} (не удалось распознать данные).'
+                f'\nБудьте здоровы!')
         send_photo(chat_id, text, photo)
     else:
         dia = pjs['dia']
@@ -64,7 +62,6 @@ def send_info(pjs):
         pulse = pjs['pulse']
         text = (f'Получены данные об измерении, произведённом {date} от {name}:\nDIA: {dia}\nSYS: {sys}\nPULSE: {pulse}'
                 f'\nБудьте здоровы!')
-        print("TEXT")
         send_message(chat_id, text)
 
 
@@ -93,8 +90,8 @@ def send_photo(chat_id, text, bytes_photo):
         write_temp.write(image_binary)
         write_temp.close()
     with open('saved_image.png', 'rb') as read_temp:
-        ret = requests.post(url, data=data, files={"photo": read_temp})
-        print(ret)
+        response = requests.post(url, data=data, files={"photo": read_temp})
+        logger.info(f'Фото отправлено боту, ответ: {response}')
         read_temp.close()
     os.remove('saved_image.png')
 
