@@ -38,10 +38,13 @@ async def send_to_server(number: int, telegram_id: int):
 
 @app.route('/send_message', methods=['POST'])
 def message_request():
-    # logger.info(request.json)
-    parsed_json = request.json
-    send_info(parsed_json)
-    return 'success', 200
+    logger.info(request.json)
+    if request.headers['Content-Type'] == 'application/json':
+        parsed_json = request.json
+        send_info(parsed_json)
+        return 'success', 200
+    else:
+        return 'unsupported media type', 415
 
 
 def send_info(pjs):
@@ -77,13 +80,11 @@ def send_message(chat_id, text):
 def send_photo(chat_id, text, photo_bytes):
     method = "sendPhoto"
     token = "7040913152:AAHJ9LadCW8pZyjo9MdpzvUA2-u5F4B7aG8"
-    url = f'https://api.telegram.org/bot{token}/{method}'
+    url = f'https://api.telegram.org/bot{token}/{method}/'
 
-    files = {'photo':  photo_bytes}
-    params = {'chat_id': chat_id, 'caption': text}
-    response = requests.post(url, params=params, files=files)
+    files = {'photo': ('photo.jpg', photo_bytes, 'image/jpeg')}
 
-    logger.info(response.json())
+    requests.post(url + f'?chat_id={chat_id}&caption={text}', files=files)
 
 
 month_names = {
