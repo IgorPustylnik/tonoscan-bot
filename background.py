@@ -2,6 +2,7 @@ import base64
 import io
 import logging
 import os
+import struct
 
 import requests
 from flask import Flask
@@ -77,11 +78,18 @@ def send_message(chat_id, text):
     requests.post(url, data=data)
 
 
-def send_photo(chat_id, text, photo_64):
+def send_photo(chat_id, text, bytes_photo):
     token = "7040913152:AAHJ9LadCW8pZyjo9MdpzvUA2-u5F4B7aG8"
     data = {"chat_id": chat_id, "caption": text}
     url = f"https://api.telegram.org/bot{token}/sendPhoto?chat_id={chat_id}"
-    image_binary = base64.b64decode(photo_64)
+    byte_array = json.loads(bytes_photo)
+    adjusted_byte_array = [byte & 0xFF for byte in byte_array]
+    binary_data = bytes(adjusted_byte_array)
+    unpacked_values = struct.unpack('b' * len(binary_data), binary_data)
+    packed_bytes = struct.pack('b' * len(unpacked_values), *unpacked_values)
+    base64_string = base64.b64encode(packed_bytes).decode('utf-8')
+    image_binary = base64.b64decode(base64_string)
+
     with open('saved_image.png', 'wb') as write_temp:
         write_temp.write(image_binary)
         write_temp.close()
