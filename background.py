@@ -39,12 +39,9 @@ async def send_to_server(number: int, telegram_id: int):
 @app.route('/send_message', methods=['POST'])
 def message_request():
     logger.info(request.json)
-    if request.headers['Content-Type'] == 'application/json':
-        parsed_json = request.json
-        send_info(parsed_json)
-        return 'success', 200
-    else:
-        return 'unsupported media type', 415
+    parsed_json = request.json
+    send_info(parsed_json)
+    return 'success', 200
 
 
 def send_info(pjs):
