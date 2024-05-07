@@ -10,6 +10,30 @@ from threading import Thread
 from datetime import datetime, timedelta
 import json
 
+import sqlite3
+
+
+def add_id(number_str, id_str):
+    logging.info(f'Added {number_str}:{id_str} to db')
+    conn = sqlite3.connect('number_id.db')
+    cur = conn.cursor()
+    cur.execute("INSERT INTO number_id (number, id) VALUES (?, ?)", (number_str, id_str))
+    conn.commit()
+    conn.close()
+
+
+def get_id(number_str):
+    conn = sqlite3.connect('number_id.db')
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM number_id WHERE number=?", (number_str,))
+    row = cur.fetchone()
+    conn.close()
+    if row:
+        return row[0]
+    else:
+        return None
+
+
 app = Flask('')
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -20,22 +44,22 @@ def index():
     return 'Привет, мир! Это удалённый сервер.'
 
 
-async def send_to_server(number, telegram_id):
-    if '+' not in number:
-        number = '+' + number
-    url = 'https://tonometer.onrender.com/tonometer-api/add-telegram-id'
-
-    headers = {'Content-Type': 'application/json'}
-
-    data = {'number': number, 'telegramId': telegram_id}
-    logger.info(f'SENT JSON DATA: {data}')
-
-    response = requests.post(url, headers=headers, json=data)
-
-    if response.status_code == 200:
-        logger.info('Успешный запрос!')
-    else:
-        logger.info(f'Ошибка при запросе:{response.status_code}')
+# async def send_to_server(number, telegram_id):
+#     if '+' not in number:
+#         number = '+' + number
+#     url = 'https://tonometer.onrender.com/tonometer-api/add-telegram-id'
+#
+#     headers = {'Content-Type': 'application/json'}
+#
+#     data = {'number': number, 'telegramId': telegram_id}
+#     logger.info(f'SENT JSON DATA: {data}')
+#
+#     response = requests.post(url, headers=headers, json=data)
+#
+#     if response.status_code == 200:
+#         logger.info('Успешный запрос!')
+#     else:
+#         logger.info(f'Ошибка при запросе:{response.status_code}')
 
 
 @app.route('/send_message', methods=['POST'])
@@ -47,7 +71,11 @@ def message_request():
 
 
 def send_info(pjs):
-    chat_id = pjs['id']
+    # chat_id = pjs['id']
+    number = pjs['number']
+    chat_id = get_id(number)
+    if chat_id is None:
+        raise Exception
     date_iso = datetime.strptime(pjs['date'], "%b %d, %Y, %I:%M:%S %p").isoformat()
     date_info = datetime.fromisoformat(date_iso) + timedelta(hours=3)
     date = date_info.strftime("%d {month} %Y года в %H:%M мск").format(
@@ -115,6 +143,13 @@ month_names = {
 
 
 def run():
+    conn = sqlite3.connect('number_id.db')
+    cur = conn.cursor()
+    cur.execute('''CREATE TABLE IF NOT EXISTS number_id (
+                    number TEXT PRIMARY KEY,
+                    id TEXT)''')
+    conn.commit()
+    conn.close()
     app.run(host='0.0.0.0', port=80)
 
 

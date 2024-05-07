@@ -1,6 +1,6 @@
 import logging
 from aiogram.types import ParseMode
-from background import keep_alive, send_to_server, logger
+from background import keep_alive, add_id, logger
 from aiogram import Bot, Dispatcher, executor, types
 
 API_TOKEN = '7040913152:AAHJ9LadCW8pZyjo9MdpzvUA2-u5F4B7aG8'
@@ -27,7 +27,10 @@ async def handle_contact(m: types.Message):
     await m.answer("Если вы ещё не внесли свой номер в список для рассылки в мобильном приложении"
                    " на телефоне вашей бабки, обязательно сделайте это! Это необходимо для того, чтобы бот "
                    " присылал вам информацию об измерениях давления.")
-    await send_to_server(contact.phone_number, contact.user_id)
+    number = contact.phone_number
+    if '+' not in number:
+        number = '+' + number
+    add_id(number, contact.user_id)
 
 
 @dp.message_handler()
