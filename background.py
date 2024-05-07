@@ -1,5 +1,6 @@
 import io
 import logging
+from aiogram import Bot, types
 from flask import Flask
 from flask import request
 from threading import Thread
@@ -7,9 +8,13 @@ from datetime import datetime
 import json
 import requests
 
+API_TOKEN = '7040913152:AAHJ9LadCW8pZyjo9MdpzvUA2-u5F4B7aG8'
+
 app = Flask('')
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
+bot = Bot(token=API_TOKEN)
 
 
 @app.route('/', methods=['GET'])
@@ -45,7 +50,7 @@ def message_request():
         return 'unsupported media type', 415
 
 
-def send_info(pjs):
+async def send_info(pjs):
     chat_id = pjs['id']
     date_iso = datetime.strptime(pjs['date'], "%b %d, %Y, %I:%M:%S %p").isoformat()
     date_info = datetime.fromisoformat(date_iso)
@@ -53,40 +58,18 @@ def send_info(pjs):
         month=month_names[date_info.month])
     name = pjs['name']
     if 'photo' in pjs:
-        photo = pjs['photo']
+        photo_bytes = pjs['photo']
+        photo = types.InputFile(photo_bytes)
         text = (f'Получены данные об измерении, произведённом {date} от {name} (не удалось распознать значения).\n'
                 f'Будьте здоровы!')
-        send_photo(chat_id, text, photo)
+        await bot.send_photo(chat_id=chat_id, photo=photo, caption=text)
     else:
         dia = pjs['dia']
         sys = pjs['sys']
         pulse = pjs['pulse']
         text = (f'Получены данные об измерении, произведённом {date} от {name}:\nDIA: {dia}\nSYS: {sys}\nPULSE: {pulse}'
                 f'\nБудьте здоровы!')
-        send_message(chat_id, text)
-
-
-def send_message(chat_id, text):
-    method = "sendMessage"
-    token = "7040913152:AAHJ9LadCW8pZyjo9MdpzvUA2-u5F4B7aG8"
-    url = f"https://api.telegram.org/bot{token}/{method}"
-
-    data = {"chat_id": chat_id, "text": text}
-    requests.post(url, data=data)
-
-
-def send_photo(chat_id, text, photo_bytes):
-    method = "sendPhoto"
-    token = "7040913152:AAHJ9LadCW8pZyjo9MdpzvUA2-u5F4B7aG8"
-    url = f'https://api.telegram.org/bot{token}/{method}'
-
-    photo_io = io.BytesIO(photo_bytes)
-    photo_io.seek(0)
-    files = {'photo': ('photo.jpg', photo_io)}
-
-    data = {'chat_id': chat_id, "text": text}
-
-    requests.post(url, data=data, files=files)
+        await bot.send_message(chat_id, text)
 
 
 month_names = {
