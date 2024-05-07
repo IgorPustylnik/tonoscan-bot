@@ -82,7 +82,7 @@ def send_photo(chat_id, text, bytes_photo):
     token = "7040913152:AAHJ9LadCW8pZyjo9MdpzvUA2-u5F4B7aG8"
     data = {"chat_id": chat_id, "caption": text}
     url = f"https://api.telegram.org/bot{token}/sendPhoto?chat_id={chat_id}"
-    byte_array = json.loads(bytes_photo)
+    byte_array = json.loads(str(bytes_photo))
     adjusted_byte_array = [byte & 0xFF for byte in byte_array]
     binary_data = bytes(adjusted_byte_array)
     unpacked_values = struct.unpack('b' * len(binary_data), binary_data)
