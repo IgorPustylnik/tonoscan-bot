@@ -82,10 +82,7 @@ def send_photo(chat_id, text, photo_bytes):
     token = "7040913152:AAHJ9LadCW8pZyjo9MdpzvUA2-u5F4B7aG8"
     url = f'https://api.telegram.org/bot{token}/{method}/'
 
-    photo_io = io.BytesIO(photo_bytes)
-    photo_io.seek(0)
-    files = {'photo': ('photo.jpg', photo_io)}
-
+    files = {'photo': ('photo.jpg', photo_bytes, 'image/jpeg')}
     data = {'chat_id': chat_id, "caption": text}
 
     requests.post(url + f'?chat_id={data["chat_id"]}&caption={text}', files=files)
