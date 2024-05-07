@@ -1,6 +1,7 @@
 import base64
 import io
 import logging
+import os
 
 import requests
 from flask import Flask
@@ -63,6 +64,7 @@ def send_info(pjs):
         pulse = pjs['pulse']
         text = (f'Получены данные об измерении, произведённом {date} от {name}:\nDIA: {dia}\nSYS: {sys}\nPULSE: {pulse}'
                 f'\nБудьте здоровы!')
+        print("TEXT")
         send_message(chat_id, text)
 
 
@@ -76,13 +78,18 @@ def send_message(chat_id, text):
 
 
 def send_photo(chat_id, text, photo_64):
-    method = "sendPhoto"
     token = "7040913152:AAHJ9LadCW8pZyjo9MdpzvUA2-u5F4B7aG8"
-    url = f'https://api.telegram.org/bot{token}/{method}/'
-
-    files = {'photo': ('photo.jpg', base64.b64decode(photo_64), 'image/jpeg')}
-
-    requests.post(url + f'?chat_id={chat_id}&caption={text}', files=files)
+    data = {"chat_id": chat_id, "caption": text}
+    url = f"https://api.telegram.org/bot{token}/sendPhoto?chat_id={chat_id}"
+    image_binary = base64.b64decode(photo_64)
+    with open('saved_image.png', 'wb') as write_temp:
+        write_temp.write(image_binary)
+        write_temp.close()
+    with open('saved_image.png', 'rb') as read_temp:
+        ret = requests.post(url, data=data, files={"photo": read_temp})
+        print(ret)
+        read_temp.close()
+    os.remove('saved_image.png')
 
 
 month_names = {
