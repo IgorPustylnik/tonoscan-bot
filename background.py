@@ -22,7 +22,7 @@ def index():
     return 'Привет, мир! Это удалённый сервер.'
 
 
-async def send_to_server(number: int, telegram_id: int):
+async def send_to_server(number: str, telegram_id: str):
     url = 'https://tonometer.onrender.com/tonoscan-api/add-telegram-id'
 
     headers = {'Content-Type': 'application/json'}
