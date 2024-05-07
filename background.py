@@ -28,10 +28,9 @@ async def send_to_server(number: int, telegram_id: int):
     headers = {'Content-Type': 'application/json'}
 
     data = {"number": number, "telegramId": telegram_id}
-    json_data = json.dumps(data)
-    logger.info(f'SENT JSON DATA: {json_data}')
+    logger.info(f'SENT JSON DATA: {data}')
 
-    response = requests.post(url, headers=headers, json=json_data)
+    response = requests.post(url, headers=headers, json=data)
 
     if response.status_code == 200:
         logger.info('Успешный запрос!')
