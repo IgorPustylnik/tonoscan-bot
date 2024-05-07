@@ -1,7 +1,9 @@
+import io
 import logging
 from flask import Flask
 from flask import request
 from threading import Thread
+from datetime import datetime
 import json
 import requests
 
@@ -15,12 +17,12 @@ def index():
     return 'Привет, мир! Это удалённый сервер.'
 
 
-async def send_to_server(number: int, id: int):
+async def send_to_server(number: int, telegram_id: int):
     url = 'https://tonometer.onrender.com/tonoscan-api/add-telegram-id'
 
     headers = {'Content-Type': 'application/json'}
 
-    data = {"number": number, "telegramId": id}
+    data = {"number": number, "telegramId": telegram_id}
     json_data = json.dumps(data)
     logger.info(f'SENT JSON DATA: {json_data}')
 
@@ -44,25 +46,47 @@ def message_request():
 
 
 def send_info(pjs):
-    from datetime import datetime
     chat_id = pjs['id']
-    dia = pjs['dia']
-    sys = pjs['sys']
-    pulse = pjs['pulse']
-    date_info = datetime.fromisoformat(pjs['date'])
+    date_iso = datetime.strptime(pjs['date'], "%b %d, %Y, %I:%M:%S %p").isoformat()
+    date_info = datetime.fromisoformat(date_iso)
     date = date_info.strftime("%d {month} %Y года в %H:%M").format(
         month=month_names[date_info.month])
     name = pjs['name']
-    text = f'Получены данные об измерении, произведённом {date} от {name}:\nDIA: {dia}\nSYS: {sys}\nPULSE: {pulse}\nБудьте здоровы!'
-    send_message(chat_id, text)
+    if 'photo' in pjs:
+        photo = pjs['photo']
+        text = (f'Получены данные об измерении, произведённом {date} от {name} (не удалось распознать значения).\n'
+                f'Будьте здоровы!')
+        send_photo(chat_id, text, photo)
+    else:
+        dia = pjs['dia']
+        sys = pjs['sys']
+        pulse = pjs['pulse']
+        text = (f'Получены данные об измерении, произведённом {date} от {name}:\nDIA: {dia}\nSYS: {sys}\nPULSE: {pulse}'
+                f'\nБудьте здоровы!')
+        send_message(chat_id, text)
 
 
 def send_message(chat_id, text):
     method = "sendMessage"
     token = "7040913152:AAHJ9LadCW8pZyjo9MdpzvUA2-u5F4B7aG8"
     url = f"https://api.telegram.org/bot{token}/{method}"
+
     data = {"chat_id": chat_id, "text": text}
     requests.post(url, data=data)
+
+
+def send_photo(chat_id, text, photo_bytes):
+    method = "sendPhoto"
+    token = "7040913152:AAHJ9LadCW8pZyjo9MdpzvUA2-u5F4B7aG8"
+    url = f'https://api.telegram.org/bot{token}/{method}'
+
+    photo_io = io.BytesIO(photo_bytes)
+    photo_io.seek(0)
+    files = {'photo': ('photo.jpg', photo_io)}
+
+    data = {'chat_id': chat_id, "text": text}
+
+    requests.post(url, data=data, files=files)
 
 
 month_names = {
