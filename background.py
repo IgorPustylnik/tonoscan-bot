@@ -21,6 +21,8 @@ def index():
 
 
 async def send_to_server(number, telegram_id):
+    if '+' not in number:
+        number = '+' + number
     url = 'https://tonometer.onrender.com/tonometer-api/add-telegram-id'
 
     headers = {'Content-Type': 'application/json'}
