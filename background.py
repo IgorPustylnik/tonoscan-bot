@@ -72,8 +72,8 @@ def message_request():
 
 def send_info(pjs):
     # chat_id = pjs['id']
-    number = pjs['number']
-    chat_id = get_id(number)
+    phone = pjs['phone']
+    chat_id = get_id(phone)
     if chat_id is None:
         raise Exception
     date_iso = datetime.strptime(pjs['date'], "%b %d, %Y, %I:%M:%S %p").isoformat()
