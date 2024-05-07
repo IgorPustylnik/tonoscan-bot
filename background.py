@@ -83,9 +83,8 @@ def send_photo(chat_id, text, photo_bytes):
     url = f'https://api.telegram.org/bot{token}/{method}/'
 
     files = {'photo': ('photo.jpg', photo_bytes, 'image/jpeg')}
-    data = {'chat_id': chat_id, "caption": text}
 
-    requests.post(url + f'?chat_id={data["chat_id"]}&caption={text}', files=files)
+    requests.post(url + f'?chat_id={chat_id}&caption={text}', files=files)
 
 
 month_names = {
