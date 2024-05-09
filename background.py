@@ -103,7 +103,7 @@ def send_info(pjs):
         pulse = pjs['pulse']
         text = (f'Получены данные об измерении, произведённом {date} от {name}:\nDIA: {dia}\nSYS: {sys}\nPULSE: {pulse}'
                 f'\nБудьте здоровы!')
-        phones = pjs['phones']
+        phones = pjs['phone']
         for phone in phones:
             if phone[0] == '8':
                 phone = '+7' + phone[1:]
