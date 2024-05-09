@@ -31,12 +31,17 @@ def get_db_connection():
 def add_id(number_str, id_str):
     if '+' not in number_str:
         number_str = '+' + number_str
-    logging.info(f'Added {number_str}:{id_str} to db')
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("INSERT INTO number_id (number, telegramId) VALUES (%s, %s)", (number_str, id_str))
-    conn.commit()
-    conn.close()
+    try:
+        cur.execute("INSERT INTO number_id (number, telegramId) VALUES (%s, %s)", (number_str, id_str))
+        conn.commit()
+        logger.info(f'Successfully added {number_str}:{id_str} to the database')
+    except psycopg2.errors.UniqueViolation:
+        conn.rollback()
+        logger.warning(f'Number {number_str} already exists in the database')
+    finally:
+        conn.close()
 
 
 def get_id(number_str):
