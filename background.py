@@ -86,7 +86,7 @@ def send_info(pjs):
         photo = pjs['photo']
         text = (f'Получено фото, сделанное {date} от {name} (не удалось распознать данные).'
                 f'\nБудьте здоровы!')
-        phones = pjs['phones']
+        phones = pjs['phone']
         for phone in phones:
             if phone[0] == '8':
                 phone = '+7' + phone[1:]
