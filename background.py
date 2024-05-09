@@ -37,11 +37,14 @@ def add_id(number_str, id_str):
         cur.execute("INSERT INTO number_id (number, telegramId) VALUES (%s, %s)", (number_str, id_str))
         conn.commit()
         logger.info(f'Successfully added {number_str}:{id_str} to the database')
+        response = 'added'
     except psycopg2.errors.UniqueViolation:
         conn.rollback()
         logger.warning(f'Number {number_str} already exists in the database')
+        response = 'already exists'
     finally:
         conn.close()
+    return response
 
 
 def get_id(number_str):

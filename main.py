@@ -22,15 +22,19 @@ async def start_message(message: types.Message):
 @dp.message_handler(content_types=['contact'])
 async def handle_contact(m: types.Message):
     contact = m.contact
-    await m.answer("Вы успешно зарегистрировались!", reply_markup=types.ReplyKeyboardRemove(),
-                   parse_mode=ParseMode.MARKDOWN)
-    await m.answer("Если вы ещё не внесли свой номер в список для рассылки в мобильном приложении"
-                   " на телефоне вашей бабки, обязательно сделайте это! Это необходимо для того, чтобы бот "
-                   " присылал вам информацию об измерениях давления.")
     number = contact.phone_number
     if '+' not in number:
         number = '+' + number
-    add_id(number, contact.user_id)
+    response = add_id(number, contact.user_id)
+    if response == 'added':
+        await m.answer("Вы успешно зарегистрировались!", reply_markup=types.ReplyKeyboardRemove(),
+                   parse_mode=ParseMode.MARKDOWN)
+    elif response == 'already exists':
+        await m.answer("Вы уже зарегистрированы.", reply_markup=types.ReplyKeyboardRemove(),
+                       parse_mode=ParseMode.MARKDOWN)
+    await m.answer("Если вы ещё не внесли свой номер в список для рассылки в мобильном приложении"
+                   " на телефоне вашей бабки, обязательно сделайте это! Это необходимо для того, чтобы бот "
+                   " присылал вам информацию об измерениях давления.")
 
 
 @dp.message_handler()
