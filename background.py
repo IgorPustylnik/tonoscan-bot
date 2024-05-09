@@ -3,6 +3,7 @@ import logging
 import os
 import struct
 
+import psycopg2
 import requests
 from flask import Flask
 from flask import request
@@ -10,22 +11,38 @@ from threading import Thread
 from datetime import datetime, timedelta
 import json
 
-import sqlite3
+
+def create_table():  # для первого запуска
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS number_id (number VARCHAR(255) PRIMARY KEY, telegramId VARCHAR(255))")
+    conn.commit()
+    conn.close()
+
+
+def get_db_connection():
+    conn = psycopg2.connect(host='dpg-cothsiocmk4c73aru4q0-a.frankfurt-postgres.render.com',
+                            database='number_id',
+                            user='admin',
+                            password='6M5NIjTYzhkAMJ7HN1XQbzjjdvs15uV6')
+    return conn
 
 
 def add_id(number_str, id_str):
+    if '+' not in number_str:
+        number_str = '+' + number_str
     logging.info(f'Added {number_str}:{id_str} to db')
-    conn = sqlite3.connect('number_id.db')
+    conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("INSERT INTO number_id (number, id) VALUES (?, ?)", (number_str, id_str))
+    cur.execute("INSERT INTO number_id (number, telegramId) VALUES (%s, %s)", (number_str, id_str))
     conn.commit()
     conn.close()
 
 
 def get_id(number_str):
-    conn = sqlite3.connect('number_id.db')
+    conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT id FROM number_id WHERE number=?", (number_str,))
+    cur.execute("SELECT telegramId FROM number_id WHERE number=%s", (number_str,))
     row = cur.fetchone()
     conn.close()
     if row:
@@ -38,44 +55,14 @@ app = Flask('')
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-
-@app.route('/', methods=['GET'])
-def index():
-    return 'Привет, мир! Это удалённый сервер.'
-
-
-# async def send_to_server(number, telegram_id):
-#     if '+' not in number:
-#         number = '+' + number
-#     url = 'https://tonometer.onrender.com/tonometer-api/add-telegram-id'
-#
-#     headers = {'Content-Type': 'application/json'}
-#
-#     data = {'number': number, 'telegramId': telegram_id}
-#     logger.info(f'SENT JSON DATA: {data}')
-#
-#     response = requests.post(url, headers=headers, json=data)
-#
-#     if response.status_code == 200:
-#         logger.info('Успешный запрос!')
-#     else:
-#         logger.info(f'Ошибка при запросе:{response.status_code}')
-
-
 @app.route('/send_message', methods=['POST'])
 def message_request():
     logger.info(request.json)
     parsed_json = request.json
-    send_info(parsed_json)
-    return 'success', 200
+    return send_info(parsed_json)
 
 
 def send_info(pjs):
-    # chat_id = pjs['id']
-    phone = pjs['phone']
-    chat_id = get_id(phone)
-    if chat_id is None:
-        raise Exception
     date_iso = datetime.strptime(pjs['date'], "%b %d, %Y, %I:%M:%S %p").isoformat()
     date_info = datetime.fromisoformat(date_iso) + timedelta(hours=3)
     date = date_info.strftime("%d {month} %Y года в %H:%M мск").format(
@@ -85,14 +72,35 @@ def send_info(pjs):
         photo = pjs['photo']
         text = (f'Получено фото, сделанное {date} от {name} (не удалось распознать данные).'
                 f'\nБудьте здоровы!')
-        send_photo(chat_id, text, photo)
+        phones = pjs['phones']
+        for phone in phones:
+            if phone[0] == '8':
+                phone = '+7' + phone[1:]
+            elif phone[0] == '7':
+                phone = '+' + phone
+            chat_id = get_id(phone)
+            if chat_id is None:
+                logger.info(f'Пользователь с номером {phone} не зарегистрирован '
+                            f'(сообщение не было отправлено)')
+            send_photo(chat_id, text, photo)
     else:
         dia = pjs['dia']
         sys = pjs['sys']
         pulse = pjs['pulse']
         text = (f'Получены данные об измерении, произведённом {date} от {name}:\nDIA: {dia}\nSYS: {sys}\nPULSE: {pulse}'
                 f'\nБудьте здоровы!')
-        send_message(chat_id, text)
+        phones = pjs['phones']
+        for phone in phones:
+            if phone[0] == '8':
+                phone = '+7' + phone[1:]
+            elif phone[0] == '7':
+                phone = '+' + phone
+            chat_id = get_id(phone)
+            if chat_id is None:
+                logger.info(f'Пользователь с номером {phone} не зарегистрирован '
+                            f'(сообщение не было отправлено)')
+            send_message(chat_id, text)
+    return 'success', 200
 
 
 def send_message(chat_id, text):
@@ -108,6 +116,8 @@ def send_photo(chat_id, text, bytes_photo):
     token = "7040913152:AAHJ9LadCW8pZyjo9MdpzvUA2-u5F4B7aG8"
     data = {"chat_id": chat_id, "caption": text}
     url = f"https://api.telegram.org/bot{token}/sendPhoto?chat_id={chat_id}"
+
+    # костыли для раскодировки
     byte_array = json.loads(str(bytes_photo))
     adjusted_byte_array = [byte & 0xFF for byte in byte_array]
     binary_data = bytes(adjusted_byte_array)
@@ -143,13 +153,6 @@ month_names = {
 
 
 def run():
-    conn = sqlite3.connect('number_id.db')
-    cur = conn.cursor()
-    cur.execute('''CREATE TABLE IF NOT EXISTS number_id (
-                    number TEXT PRIMARY KEY,
-                    id TEXT)''')
-    conn.commit()
-    conn.close()
     app.run(host='0.0.0.0', port=80)
 
 
