@@ -55,6 +55,12 @@ app = Flask('')
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+
+@app.route('/', methods=['GET'])
+def index():
+    return 'TonoScan Bot server'
+
+
 @app.route('/send_message', methods=['POST'])
 def message_request():
     logger.info(request.json)
