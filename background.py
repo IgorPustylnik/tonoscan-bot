@@ -71,7 +71,6 @@ def index():
 
 @app.route('/send_message', methods=['POST'])
 def message_request():
-    logger.info(request.json)
     parsed_json = request.json
     return send_info(parsed_json)
 
@@ -101,7 +100,7 @@ def send_info(pjs):
         dia = pjs['dia']
         sys = pjs['sys']
         pulse = pjs['pulse']
-        text = (f'Получены данные об измерении, произведённом {date} от {name}:\nDIA: {dia}\nSYS: {sys}\nPULSE: {pulse}'
+        text = (f'Получены данные об измерении, произведённом {date} от {name}:\nSYS: {sys}\nDIA: {dia}\nPUL: {pulse}'
                 f'\nБудьте здоровы!')
         phones = pjs['phone']
         for phone in phones:
